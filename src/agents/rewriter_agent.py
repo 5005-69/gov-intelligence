@@ -38,6 +38,7 @@ class RewriterAgent(BaseAgent):
             model=settings.rewriter_llm_model,
             temperature=0.0,
             api_key=settings.openai_api_key,
+            base_url=settings.openai_api_base,
         )
 
     def execute(self, state: dict[str, Any]) -> dict[str, Any]:
@@ -69,29 +70,9 @@ class RewriterAgent(BaseAgent):
                 )
                 rewritten = query
 
-        try:
-            embeddings = embed_texts([rewritten])
-        except Exception as e:
-            _console.print(
-                f"[red]RewriterAgent embedding call failed:[/red] {e}"
-            )
-            return {
-                "rewritten_query": rewritten,
-                "query_embedding": [],
-                "embedding_error": str(e) or type(e).__name__,
-            }
-
-        embedding = embeddings[0] if embeddings else []
-        if not embedding:
-            return {
-                "rewritten_query": rewritten,
-                "query_embedding": [],
-                "embedding_error": "embedding service returned empty vector",
-            }
-
         return {
             "rewritten_query": rewritten,
-            "query_embedding": embedding,
+            "query_embedding": [],
             "embedding_error": None,
         }
 

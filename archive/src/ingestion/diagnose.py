@@ -4,7 +4,7 @@ from rich.console import Console
 from rich.table import Table
 
 from src.config import settings
-from src.ingestion.ingest import _extract, assess_text_quality
+from archive.src.ingestion.ingest import _extract, assess_text_quality
 
 
 _console = Console()

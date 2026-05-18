@@ -6,7 +6,7 @@ from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TimeEl
 from src.config import settings
 from src.pdf.docling_loader import load_pdf
 from src.ingestion.chunker import chunk_document
-from src.ingestion.metadata import metadata_from_path, enrich_with_llm
+from archive.src.ingestion.metadata import metadata_from_path, enrich_with_llm
 from src.ingestion.embedder import embed_texts
 from src.retrieval.store import delete_by_source, existing_sources, insert_chunks
 

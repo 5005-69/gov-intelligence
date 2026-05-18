@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     )
 
     openai_api_key: str
+    openai_api_base: str | None = None
     openai_chat_model: str = "gpt-5.4"
     openai_embedding_model: str = "text-embedding-3-small"
     openai_embedding_dimension: int = 1536
@@ -19,8 +20,8 @@ class Settings(BaseSettings):
     metadata_llm_model: str = "gpt-5.4-mini"
     enable_llm_metadata: bool = True
 
-    supabase_url: str
-    supabase_service_key: str
+    supabase_url: str | None = None
+    supabase_service_key: str | None = None
     supabase_anon_key: str | None = None
     supabase_table: str = "documents"
 
