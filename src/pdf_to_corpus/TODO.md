@@ -1,9 +1,9 @@
 # PDF to Corpus TODO
 
 ## 1. Indexer Upgrades (indexer.py)
-- [ ] **OCR Fallback:** Ενσωμάτωση του `tools/ocr.py` ώστε αν μια σελίδα δεν έχει text, να τρέχει αυτόματα OCR πριν την ανάλυση.
-- [ ] **Article Range Detection:** Αναβάθμιση της λογικής ώστε να βρίσκει την αρχή ΚΑΙ το τέλος κάθε άρθρου (π.χ. Άρθρο 5: Σελίδες 10-14).
-- [ ] **Table of Contents (ToC) Fix:** Ενσωμάτωση της λογικής από το `test_indexer_fix.py` για την αποφυγή λανθασμένων εγγραφών από τα περιεχόμενα.
+- [x] **OCR Fallback:** Ενσωμάτωση του `tools/ocr.py` ώστε αν μια σελίδα δεν έχει text, να τρέχει αυτόματα OCR πριν την ανάλυση.
+- [x] **Article Range Detection:** Αναβάθμιση της λογικής ώστε να βρίσκει την αρχή ΚΑΙ το τέλος κάθε άρθρου (π.χ. Άρθρο 5: Σελίδες 10-14).
+- [x] **Table of Contents (ToC) Fix:** Ενσωμάτωση της λογικής από το `test_indexer_fix.py` για την αποφυγή λανθασμένων εγγραφών από τα περιεχόμενα.
 - [ ] **AI-Powered Indexing:** Χρήση LLM (μία φορά κατά το ingestion) για την παραγωγή Περιλήψεων (Summaries) και Tags για κάθε άρθρο.
 
 ## 2. Tools Optimization
