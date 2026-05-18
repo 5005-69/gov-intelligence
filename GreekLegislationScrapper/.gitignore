@@ -1,0 +1,21 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Node.js dependencies
+node_modules
+# typescript build output
+dist
+# output file
+downloads
+
+
+# Downloaded PDFs (too large for source control; regenerate with npm run scrape:all)
+downloads/**/*.pdf

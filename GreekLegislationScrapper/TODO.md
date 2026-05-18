@@ -1,0 +1,10 @@
+- Scrapper for EU/EFTA legislation
+- Scrapper for constitution
+- Scrapper for international agreements
+- Move `downloadFile`, `downloadFileWithRetry`, and `wait` from exportListingTable.ts and checkNewLegislation.ts into utils.ts (currently duplicated)
+- Add `.github/workflows/ci.yml` to run `npm test` and `npm run typecheck` on push (README badges already reference it)
+- Review `.gitignore`: bare `downloads` entry may suppress markdown index files — check if intentional
+- Add JSON export alongside markdown index files for programmatic querying
+- Add notification (email/webhook via env variable) when `check:new` detects new PDFs
+- Add `setup-cron.sh` for Linux/macOS scheduling (counterpart to setup-scheduled-task.ps1)
+- Guard against incomplete year files in `scrape:all` by using a `.partial` sentinel during writes to prevent silent skips on resume
