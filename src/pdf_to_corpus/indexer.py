@@ -2,6 +2,7 @@ import os
 import fitz
 import re
 from pathlib import Path
+from src.config import settings
 
 def normalize_text(text):
     """Μετατρέπει σε κεφαλαία, αφαιρεί τόνους και διορθώνει λατινικούς χαρακτήρες που μοιάζουν με ελληνικούς."""
@@ -48,15 +49,17 @@ def extract_metadata(first_page_text, second_page_text=""):
         number = num_match.group(1) if num_match else "Unknown"
         date = date_match.group(1) if date_match else "Unknown"
     else:
-        series = fek_match.group(1)
-        if not series: series = "A"
+        series_raw = fek_match.group(1)
+        # Χαρτογράφηση ελληνικών χαρακτήρων τευχών σε λατινικούς (Α -> A, Β -> B κλπ)
+        series_map = {"Α": "A", "Β": "B", "Γ": "C", "Δ": "D"}
+        series = series_map.get(series_raw, series_raw if series_raw else "A")
         number = fek_match.group(2)
         date = fek_match.group(3)
     
     law_number = law_match.group(1) if law_match else "Unknown"
     return law_number, series, number, date
 
-def build_index(pdf_path, output_dir):
+def build_index(pdf_path: Path):
     try:
         doc = fitz.open(pdf_path)
     except Exception as e:
@@ -70,6 +73,23 @@ def build_index(pdf_path, output_dir):
     second_page_text = doc[1].get_text("text") if len(doc) > 1 else ""
     
     law_number, fek_series, fek_number, date = extract_metadata(first_page_text, second_page_text)
+    
+    # Προσδιορισμός έτους από την ημερομηνία αν είναι δυνατόν, αλλιώς από το path
+    year_match = re.search(r"\d{4}", date)
+    if year_match:
+        year = year_match.group(0)
+    else:
+        # Προσπάθεια εξαγωγής από το path αν είναι στο format corpus/raw/YEAR/series_X
+        parts = pdf_path.parts
+        year = "Unknown"
+        for i, part in enumerate(parts):
+            if part == "raw" and i + 1 < len(parts):
+                year = parts[i+1]
+                break
+    
+    # Δημιουργία output directory: corpus/index/{year}/series_{fek_series}
+    output_dir = settings.index_dir / year / f"series_{fek_series}"
+    output_dir.mkdir(parents=True, exist_ok=True)
     
     index_entries = []
     # Ψάχνουμε για το μοτίβο "Άρθρο X" σε κάθε σελίδα
@@ -94,7 +114,6 @@ def build_index(pdf_path, output_dir):
             
     # Εξαγωγή σε Markdown
     pdf_name = pdf_path.stem
-    year = pdf_path.parent.name
     md_path = output_dir / f"{pdf_name}.md"
     
     with open(md_path, "w", encoding="utf-8") as f:
@@ -103,7 +122,13 @@ def build_index(pdf_path, output_dir):
         f.write(f"law_number: {law_number}\n")
         f.write(f"fek: {fek_series} {fek_number}/{year}\n")
         f.write(f"publication_date: {date}\n")
-        f.write(f"source_pdf: {pdf_path.name}\n")
+        # Σχετικό path για το PDF από το root του project
+        try:
+            rel_pdf_path = pdf_path.relative_to(Path.cwd())
+        except ValueError:
+            rel_pdf_path = pdf_path
+            
+        f.write(f"source_pdf: {rel_pdf_path}\n")
         f.write(f"total_pages: {len(doc)}\n")
         f.write("---\n\n")
         f.write(f"# Ευρετήριο ΦΕΚ {fek_series} {fek_number}\n\n")
@@ -117,20 +142,22 @@ def build_index(pdf_path, output_dir):
         else:
             for art, page in unique_entries:
                 f.write(f"- **Άρθρο {art}**: Σελίδα {page}\n")
-                
-def main():
-    pdf_dir = Path("downloads/2025")
-    output_dir = Path("corpus/2025")
-    output_dir.mkdir(parents=True, exist_ok=True)
     
-    pdf_files = list(pdf_dir.glob("*.pdf"))
+    print(f"Generated index: {md_path}")
+
+def process_all():
+    """Σαρώνει το corpus/raw για PDF και δημιουργεί το index."""
+    if not settings.raw_dir.exists():
+        print(f"Directory {settings.raw_dir} does not exist.")
+        return
+
+    pdf_files = list(settings.raw_dir.glob("**/*.pdf"))
     if not pdf_files:
-        print(f"Δεν βρέθηκαν PDF στον φάκελο {pdf_dir}")
+        print(f"Δεν βρέθηκαν PDF στον φάκελο {settings.raw_dir}")
         return
         
     for pdf_path in pdf_files:
-        build_index(pdf_path, output_dir)
-        print(f"Processed {pdf_path.name}")
+        build_index(pdf_path)
 
 if __name__ == "__main__":
-    main()
+    process_all()

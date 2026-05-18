@@ -25,7 +25,10 @@ class Settings(BaseSettings):
     supabase_anon_key: str | None = None
     supabase_table: str = "documents"
 
-    downloads_dir: Path = Path("downloads")
+    # Directory Structure
+    corpus_dir: Path = Path("corpus")
+    raw_dir: Path = corpus_dir / "raw"
+    index_dir: Path = corpus_dir / "index"
 
     enable_ocr: bool = True
     ocr_languages: str = "ell+eng"

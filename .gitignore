@@ -15,4 +15,5 @@ __pycache__/
 
 # Local data
 downloads/
+corpus/raw/
 *.log
