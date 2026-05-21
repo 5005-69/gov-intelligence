@@ -9,7 +9,7 @@
 ## 2. Tools Optimization
 - [ ] **Docling Integration:** Αξιοποίηση του `tools/docling_loader.py` για καλύτερη αναγνώριση της δομής (headers, tables).
 - [ ] **Parallel Processing:** Υποστήριξη παράλληλης επεξεργασίας πολλών PDF για ταχύτητα.
-- [ ] **Metadata Extraction:** Βελτίωση του regex για την εξαγωγή Law Number και ΦΕΚ Series σε δύσκολες περιπτώσεις.
+- [x] **Metadata Extraction:** Βελτίωση του regex για την εξαγωγή Law Number και ΦΕΚ Series σε δύσκολες περιπτώσεις.
 
 ## 3. Output Quality
 - [ ] **Markdown Schema:** Εφαρμογή του νέου σχήματος Markdown (front-matter με tags/summary και λεπτομερής χάρτης πλοήγησης).

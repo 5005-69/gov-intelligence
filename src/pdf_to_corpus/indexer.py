@@ -11,10 +11,20 @@ def normalize_for_match(text):
     norm_text = text.upper()
     accents = {
         'Ά': 'Α', 'Έ': 'Ε', 'Ή': 'Η', 'Ί': 'Ι', 'Ό': 'Ο', 'Ύ': 'Υ', 'Ώ': 'Ω',
-        'Ϊ': 'Ι', 'Ϋ': 'Υ', 'ά': 'Α', 'έ': 'Ε', 'ή': 'Η', 'ί': 'Ι', 'ό': 'Ο', 'ύ': 'Υ', 'ώ': 'Ω'
+        'Ϊ': 'Ι', 'Ϋ': 'Υ', 'ά': 'Α', 'έ': 'Ε', 'ή': 'Η', 'ί': 'Ι', 'ό': 'Ο', 'ύ': 'Υ', 'ώ': 'Ω',
+        'ϊ': 'Ι', 'ϋ': 'Υ', 'ΐ': 'Ι', 'ΰ': 'Υ'
     }
     for acc, no_acc in accents.items():
         norm_text = norm_text.replace(acc, no_acc)
+        
+    mapping = {
+        'A': 'Α', 'B': 'Β', 'E': 'Ε', 'Z': 'Ζ', 'H': 'Η', 'I': 'Ι',
+        'K': 'Κ', 'M': 'Μ', 'N': 'Ν', 'O': 'Ο', 'P': 'Ρ', 'T': 'Τ',
+        'X': 'Χ', 'Y': 'Υ'
+    }
+    for lat, gr in mapping.items():
+        norm_text = norm_text.replace(lat, gr)
+        
     # Αφαίρεση περιττών κενών
     return " ".join(norm_text.split())
 
@@ -32,7 +42,7 @@ def extract_basic_metadata(doc):
     
     # Εντοπισμός Τύπου Εγγράφου
     doc_type = "Άγνωστο"
-    if "ΝΟΜΟΣ ΥΠ" in norm_text[:1000]: doc_type = "Νόμος"
+    if "ΝΟΜΟΣ" in norm_text[:1000]: doc_type = "Νόμος"
     elif "ΠΡΟΕΔΡΙΚΟ ΔΙΑΤΑΓΜΑ" in norm_text[:1000]: doc_type = "Προεδρικό Διάταγμα"
     elif "ΠΡΑΞΗ ΥΠΟΥΡΓΙΚΟΥ" in norm_text[:1000]: doc_type = "Π.Υ.Σ."
     elif "ΑΠΟΦΑΣΗ" in norm_text[:1000]: doc_type = "Απόφαση"
@@ -63,15 +73,26 @@ def extract_basic_metadata(doc):
 def extract_title(doc):
     """Εξάγει τον πλήρη τίτλο χρησιμοποιώντας Regex πάνω στο αρχικό κείμενο."""
     text = doc[0].get_text("text")
+    norm_text = normalize_for_match(text)
+    clean_text = " ".join(text.split())
+    clean_norm = " ".join(norm_text.split())
     
-    # Ψάχνουμε τα πάντα ανάμεσα στον αριθμό του νόμου και το "Ο ΠΡΟΕΔΡΟΣ"
-    match = re.search(r"(?:ΝΟΜΟΣ ΥΠ[’'] ΑΡΙΘΜ\. \d+|ΠΡΟΕΔΡΙΚΟ ΔΙΑΤΑΓΜΑ ΥΠ[’'] ΑΡΙΘΜ\. \d+)\n+(.*?)\n+(?:Ο ΠΡΟΕΔΡΟΣ|Η ΠΡΟΕΔΡΟΣ|Ο ΠΡΩΘΥΠΟΥΡΓΟΣ)", text, re.DOTALL)
+    start_match = re.search(r"(?:ΝΟΜΟΣ|ΔΙΑΤΑΓΜΑ|ΑΠΟΦΑΣΗ)[^0-9]*\d+", clean_norm)
+    end_markers = ["Η ΠΡΟΕΔΡΟΣ", "Ο ΠΡΟΕΔΡΟΣ", "Ο ΠΡΩΘΥΠΟΥΡΓΟΣ", "ΕΧΟΝΤΑΣ ΥΠΟΨΗ", "ΑΡΘΡΟ 1"]
+    end_pos = len(clean_text)
     
-    if match:
-        # Καθαρίζουμε τον τίτλο από περιττά newlines
-        clean_title = " ".join(match.group(1).split())
-        return clean_title
-    return "Δεν εντοπίστηκε τίτλος"
+    for marker in end_markers:
+        pos = clean_norm.find(marker)
+        if pos != -1 and pos < end_pos:
+            if pos > (start_match.end() if start_match else 0):
+                end_pos = pos
+                
+    start_pos = start_match.end() if start_match else 0
+    title = clean_text[start_pos:end_pos].strip()
+    
+    if len(title) < 10 or len(title) > 2000:
+        return "Δεν εντοπίστηκε τίτλος"
+    return title
 
 def scan_document_structure(doc):
     """
